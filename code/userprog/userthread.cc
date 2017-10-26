@@ -1,6 +1,53 @@
+#ifdef CHANGED
 # include "userthread.h"
 
-int do_ThreadCreate(int f, int arg) {
-    Thread *newThread = new Thread ("NewThread");
-    newThread->Start(StartUserThread, schmurtz);
+struct schmurtz {
+    int f_adress;
+    int arg_adress;
+};
+
+static void StartUserThread(void* schmurtz) {
+    int i;
+
+    struct schmurtz *new_schmurtz = (struct schmurtz *) schmurtz;
+
+    for (i = 0; i < NumTotalRegs; i++) machine->WriteRegister(i, 0);
+
+    // Initial program counter -- must be location of "Start"
+    DEBUG('x', "Writing function adress : 0x%x to PCReg\n", new_schmurtz->f_adress);
+    machine->WriteRegister(PCReg, new_schmurtz->f_adress);
+
+    // Need to also tell MIPS where next instruction is, because
+    // of branch delay possibility
+    machine->WriteRegister(NextPCReg, machine->ReadRegister(PCReg) + 4);
+
+    DEBUG('x', "Writing arg adress : 0x%x to register 4\n", new_schmurtz->arg_adress);
+    machine->WriteRegister(4, new_schmurtz->arg_adress);
+
+    // Set the stack register to the end of the address space, where we
+    // allocated the stack; but subtract off a bit, to make sure we don't
+    // accidentally reference off the end!
+    int userStackPtr = currentThread->space->AllocateUserStack();
+    machine->WriteRegister(StackReg, userStackPtr);
+    DEBUG('a', "Initializing stack register to 0x%x\n", userStackPtr);
 }
+
+int do_ThreadCreate(int f, int arg) {
+    struct schmurtz container;
+    Thread *newThread = new Thread("New Thread");
+
+    container.f_adress   = f;
+    container.arg_adress = arg;
+
+    newThread->Start((VoidFunctionPtr) StartUserThread, (void*) &container);
+    return 1;
+}
+
+int do_ThreadExit() {
+  currentThread->Finish();
+  // On ne sait pas si d'autres threads utilisent cet espace d'adressage
+  return 1;
+}
+
+
+#endif //CHANGED

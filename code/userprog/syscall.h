@@ -51,7 +51,7 @@ void PutChar(char c);
 void GetString(char * s, int n);
 void GetInt(int *k);
 void PutInt(int k);
-int ThreadCreate(void f(void *arg), void *arg);
+int ThreadCreate(void (*f) (void *arg), void *arg);
 void ThreadExit(void);
 # endif // ifdef CHANGED
 
