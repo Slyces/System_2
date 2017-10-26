@@ -39,6 +39,8 @@
 # define SC_GetString   14
 # define SC_GetInt      15
 # define SC_PutInt      16
+# define SC_ThreadCreate 17
+# define SC_ThreadExit  18
 #endif // ifdef CHANGED
 
 #ifdef IN_USER_MODE
@@ -49,6 +51,8 @@ void PutChar(char c);
 void GetString(char * s, int n);
 void GetInt(int *k);
 void PutInt(int k);
+int ThreadCreate(void f(void *arg), void *arg);
+void ThreadExit(void);
 # endif // ifdef CHANGED
 
 // LB: This part is read only on compiling the test/*.c files.

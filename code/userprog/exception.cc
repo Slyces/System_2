@@ -186,6 +186,17 @@ ExceptionHandler(ExceptionType which)
             break;
         }
 
+        case SC_ThreadCreate:
+        {
+          int n = do_ThreadCreate(f,arg);
+          break;
+        }
+        case SC_ThreadExit:
+        {
+          ThreadFinish();
+          break;
+        }
+
         case SC_Exit:
         {
             DEBUG('s', "Exit\n");
