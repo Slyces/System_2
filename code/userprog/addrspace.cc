@@ -206,7 +206,9 @@ AddrSpace::RestoreState()
 /* ======================================================================
  * Action 1.4
  * ====================================================================== */
+ #ifdef CHANGED
 int
 AddrSpace::AllocateUserStack() {
     return numPages * PageSize - 256;
 }
+//#endif CHANGED
