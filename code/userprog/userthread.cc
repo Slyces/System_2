@@ -20,6 +20,7 @@ static void StartUserThread(void* schmurtz) {
     // Need to also tell MIPS where next instruction is, because
     // of branch delay possibility
     machine->WriteRegister(NextPCReg, machine->ReadRegister(PCReg) + 4);
+    //machine->WriteRegister(NextPCReg, new_schmurtz->f_adress + 4);
 
     DEBUG('x', "Writing arg adress : 0x%x to register 4\n", new_schmurtz->arg_adress);
     machine->WriteRegister(4, new_schmurtz->arg_adress);
@@ -31,7 +32,7 @@ static void StartUserThread(void* schmurtz) {
     machine->WriteRegister(StackReg, userStackPtr);
     DEBUG('a', "Initializing stack register to 0x%x\n", userStackPtr);
 
-    //machine->Run();
+    machine->Run();
 }
 
 int do_ThreadCreate(int f, int arg) {

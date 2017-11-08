@@ -21,14 +21,16 @@ int main() {
     int char_thread = ThreadCreate(func, (void *) 'a');
 
     // main
-    PutString("le retour d' el main.");
+    PutString("ceci el main.\n");
 
     //Secon thread
     func = afficheString;
     char_thread = ThreadCreate(func, "coucou c'est nous");
 
-    // main
-    PutString("ceci est el main. fin");
 
+    // main
+    PutString("el main. fin\n");
+    while (1) {
+    }
     return 0;
   }
