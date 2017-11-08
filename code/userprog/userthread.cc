@@ -30,6 +30,8 @@ static void StartUserThread(void* schmurtz) {
     int userStackPtr = currentThread->space->AllocateUserStack();
     machine->WriteRegister(StackReg, userStackPtr);
     DEBUG('a', "Initializing stack register to 0x%x\n", userStackPtr);
+
+    //machine->Run();
 }
 
 int do_ThreadCreate(int f, int arg) {

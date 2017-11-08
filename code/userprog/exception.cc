@@ -195,6 +195,7 @@ ExceptionHandler(ExceptionType which)
           int f_adress = machine->ReadRegister(4);
           int arg_adress = machine->ReadRegister(5);
           int n = do_ThreadCreate(f_adress, arg_adress);
+          machine->WriteRegister(2,n); // return -1
           break;
         }
         case SC_ThreadExit:
