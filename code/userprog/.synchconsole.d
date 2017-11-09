@@ -7,4 +7,4 @@
  ../threads/list.h ../machine/interrupt.h ../threads/list.h \
  ../machine/stats.h ../machine/timer.h ../userprog/synchconsole.h \
  ../machine/console.h ../userprog/syscall.h ../threads/synch.h \
- synchconsole.h ../threads/synch.h
+ ../threads/synch.h synchconsole.h

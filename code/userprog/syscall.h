@@ -46,6 +46,7 @@
 #ifdef IN_USER_MODE
 
 # ifdef CHANGED
+
 void PutString(char * string);
 void PutChar(char c);
 void GetString(char * s, int n);

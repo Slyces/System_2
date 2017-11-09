@@ -66,10 +66,9 @@ Semaphore::P ()
 {
     IntStatus oldLevel = interrupt->SetLevel (IntOff);	// disable interrupts
 
-    while (value == 0)
-      {				// semaphore not available
-	  queue->Append ((void *) currentThread);	// so go to sleep
-	  currentThread->Sleep ();
+    while (value == 0) {				// semaphore not available
+    	  queue->Append ((void *) currentThread);	// so go to sleep
+    	  currentThread->Sleep ();
       }
     value--;			// semaphore available,
     // consume its value
@@ -98,61 +97,127 @@ Semaphore::V ()
     (void) interrupt->SetLevel (oldLevel);
 }
 
+/* =============================================================================
+ * ============================================================================= */
+
 // Dummy functions -- so we can compile our later assignments
 // Note -- without a correct implementation of Condition::Wait(),
 // the test case in the network assignment won't work!
 Lock::Lock (const char *debugName)
 {
-    (void) debugName;
-    /* TODO */
-    ASSERT(FALSE);
+    name = debugName;
+    #ifdef CHANGED
+      owner = NULL;
+      queue = new List;
+      depth = 0;
+    #endif //CHANGED
 }
 
-Lock::~Lock ()
-{
+Lock::~Lock () {
+    #ifdef CHANGED
+      delete owner;
+      delete queue;
+    #endif //CHANGED
 }
 void
 Lock::Acquire ()
 {
-    /* TODO */
-    ASSERT(FALSE);
+    #ifdef CHANGED
+      IntStatus oldLevel = interrupt->SetLevel (IntOff); // disable interrupts
+
+      while (owner != NULL && owner != currentThread) { // lock not available
+        queue->Append ((void *) currentThread); // so go to sleep
+        currentThread->Sleep ();
+      }
+      owner = currentThread; // lock available,
+      depth++; // recursive lock + 1 level
+
+      (void) interrupt->SetLevel (oldLevel); // re-enable interrupts
+
+    #endif //CHANGED
 }
 void
 Lock::Release ()
 {
-    /* TODO */
-    ASSERT(FALSE);
+    #ifdef CHANGED
+      IntStatus oldLevel = interrupt->SetLevel (IntOff);
+      ASSERT(owner == currentThread);
+      depth--; // recursive lock - 1 level
+
+      if (depth == 0) {
+          Thread *thread = (Thread *) queue->Remove ();
+          if (thread != NULL) // make thread ready
+            scheduler->ReadyToRun (thread);
+          owner = NULL;
+      }
+
+      (void) interrupt->SetLevel (oldLevel);
+
+    #endif //CHANGED
 }
+bool
+Lock::isHeldByCurrentThread() {
+    return owner == currentThread;
+}
+/* =============================================================================
+ * ============================================================================= */
 
 Condition::Condition (const char *debugName)
 {
-    (void) debugName;
-    /* TODO */
-    ASSERT(FALSE);
+    //(void) debugName;
+    #ifdef CHANGED
+      name = debugName;
+      queue = new List;
+
+    #endif //CHANGED
 }
 
 Condition::~Condition ()
 {
+    #ifdef CHANGED
+      delete queue;
+
+    #endif //CHANGED
 }
 void
 Condition::Wait (Lock * conditionLock)
 {
-    (void) conditionLock;
-    /* TODO */
-    ASSERT (FALSE);
+    //(void) conditionLock;
+    #ifdef CHANGED
+      IntStatus oldLevel = interrupt->SetLevel (IntOff);
+
+      conditionLock->Release();
+      queue->Append((void *) currentThread);
+      currentThread->Sleep();
+      conditionLock->Acquire();
+
+      (void) interrupt->SetLevel (oldLevel);
+    #endif //CHANGED
 }
 
 void
 Condition::Signal (Lock * conditionLock)
 {
-    (void) conditionLock;
-    /* TODO */
-    ASSERT(FALSE);
+    //(void) conditionLock;
+    #ifdef CHANGED
+
+      ASSERT(conditionLock->isHeldByCurrentThread());
+      Thread * thread;
+      if ((thread = (Thread *) queue->Remove()) != NULL)
+          scheduler->ReadyToRun(thread);
+
+    #endif //CHANGED
 }
 void
 Condition::Broadcast (Lock * conditionLock)
 {
     (void) conditionLock;
-    /* TODO */
-    ASSERT(FALSE);
+    #ifdef CHANGED
+
+    ASSERT(conditionLock->isHeldByCurrentThread());
+    Thread * thread;
+    while ((thread = (Thread *) queue->Remove()) != NULL)
+        scheduler->ReadyToRun(thread);
+
+    #endif //CHANGED
 }

@@ -6,7 +6,6 @@
 
 static Semaphore *readAvail;
 static Semaphore *writeDone;
-static Semaphore *mutex;
 
 static void ReadAvailHandler(void *arg) {
     (void)arg; readAvail->V();
@@ -19,34 +18,53 @@ static void WriteDoneHandler(void *arg) {
 SynchConsole::SynchConsole(const char *in, const char *out) {
     readAvail = new Semaphore("read avail", 0);
     writeDone = new Semaphore("write done", 0);
-    mutex     = new Semaphore("getstring done", 0);
     console   = new Console(in, out, ReadAvailHandler, WriteDoneHandler, 0);
+    read_lock = new Lock("read lock");
+    write_lock = new Lock("write lock");
+
+
+    print_lock = new Lock("print lock");
 }
 
 SynchConsole::~SynchConsole() {
     delete console;
     delete writeDone;
     delete readAvail;
-    delete mutex;
+    delete read_lock;
+    delete write_lock;
+
+
+    delete print_lock;
 }
 
 void SynchConsole::SynchPutChar(int ch) {
+    write_lock->Acquire();
     console->PutChar(ch);
     writeDone->P();
+    write_lock->Release();
 }
 
 int SynchConsole::SynchGetChar() {
+    char c;
+
+    read_lock->Acquire();
+
     readAvail->P(); // wait for character to arrive
-    return console->GetChar();
+    c = console->GetChar();
+
+    read_lock->Release();
+    return c;
 }
 
 void SynchConsole::SynchPutString(const char *s) {
+    write_lock->Acquire();
     int i = 0;
 
     while (s[i] != '\0') {
         SynchPutChar(s[i]);
         i++;
     }
+    write_lock->Release();
 }
 
   #if 1
@@ -58,7 +76,7 @@ int SynchConsole::SynchGetString(char *s, int n) {
 
     if (n == 1) { s[0] = '\0'; return 0; } // case of empty call (1 byte only
                                            // for \0)
-
+    read_lock->Acquire();
     do {
         c = SynchGetChar();
 
@@ -75,10 +93,12 @@ int SynchConsole::SynchGetString(char *s, int n) {
         default:
             s[i] = c;
             i++;
-        }
-    } // on garde 1 caractère pour le \0.
-    while (i < n - 1);
+        } // on garde 1 caractère pour le \0.
+    } while (i < n - 1);
     s[i] = '\0'; // last instruction was i++, so the \0 is at s[n-1], n'th char
+
+    read_lock->Release();
+
     return i + 1; // when exiting this way (full string, still things to read),
                   // we count the \0. and send back n instead of at most n - 1
 }

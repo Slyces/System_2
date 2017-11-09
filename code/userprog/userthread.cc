@@ -41,6 +41,7 @@ static void StartUserThread(void* schmurtz) {
 }
 
 int do_ThreadCreate(int f, int arg) {
+
     struct schmurtz * container = new struct schmurtz;
     Thread *newThread = new Thread("New Thread");
 
@@ -52,9 +53,9 @@ int do_ThreadCreate(int f, int arg) {
 }
 
 int do_ThreadExit() {
-  currentThread->Finish();
-  // On ne sait pas si d'autres threads utilisent cet espace d'adressage
-  return 1;
+    currentThread->Finish();
+    // On ne sait pas si d'autres threads utilisent cet espace d'adressage
+    return 1;
 }
 
 

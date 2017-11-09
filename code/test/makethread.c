@@ -5,14 +5,19 @@ void thread_test(void* array) {
     char c = (char)((int*) array)[1];
     int n = ((int*) array)[2];
     int i;
-    printf(">> Thread %d :: Entering thread\n", id);
+
+    // PutInt(id);
+    // PutChar(c);
+
+    // printf(">> Thread %d :: Entering\n", id);
+    printf("[%d|", id);
     for (i = 0; i < n; i++) {
       /* code */
-      PutChar(c + i);
+      // PutChar(c + i);
     }
-    printf("\n");
+    printf("|%d]", id);
     // Thread::ThreadExit();
-    printf(">> Thread :: Exiting thread\n");
+    // PutString(">> Thread :: Exiting\n");
     ThreadExit();
 }
 
@@ -28,12 +33,12 @@ int main() {
     array[1][1] = 'A';
     array[2][1] = '0';
 
-    printf(">> Main :: pre-creation\n");
+    PutString(">> Main :: pre-creation\n");
     for (i = 0; i < n; i++) {
       char_thread = ThreadCreate(thread_test, array[i]);
     }
-    printf(">> Main :: post-creation\n");
-    printf(">> Main :: random dashes ---------------------------------------------------------------------------\n");
+    PutString(">> Main :: post-creation\n");
+    // PutString(">> Main :: random dashes ---------------------------------------------------------------------------\n");
     ThreadExit();
     return 1;
 }
