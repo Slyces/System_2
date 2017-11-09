@@ -355,16 +355,16 @@ int sprintf(char * buf, const char *fmt, ...)
 int printf(const char *fmt, ...);
 int printf(const char *fmt, ...)
 {
-								va_list args;
-								int i;
-								char * buf[200];
+		va_list args;
+		int i;
+		char * buf[30];
 
-								va_start(args, fmt);
+		va_start(args, fmt);
 
-								i=vsprintf(buf,fmt,args);
+		i=vsprintf(buf,fmt,args);
 
-								va_end(args);
+		va_end(args);
 
-								PutString(buf);
-								return i;
+		PutString(buf);
+		return i;
 }
