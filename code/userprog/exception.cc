@@ -173,29 +173,30 @@ ExceptionHandler(ExceptionType which)
 
         case SC_GetInt:
         {
-            char_stack_lock->P();
             DEBUG('s', "GetInt\n");
             int  to         = machine->ReadRegister(4);
             int  max_size   = 12;
             int *int_buffer = (int *)malloc(sizeof(int));
 
             char string_buffer[max_size + 1];
+            char_stack_lock->P();
             synchconsole->SynchGetString(string_buffer, max_size);
             sscanf(string_buffer, "%d", int_buffer);
 
             machine->WriteMem(to, 4, *int_buffer);
             free(int_buffer);
-
             char_stack_lock->V();
             break;
         }
 
         case SC_ThreadCreate:
         {
+          DEBUG('s', "ThreadCreate\n");
           int f_adress = machine->ReadRegister(4);
           int arg_adress = machine->ReadRegister(5);
           int n = do_ThreadCreate(f_adress, arg_adress);
           machine->WriteRegister(2,n); // return -1
+
           break;
         }
         case SC_ThreadExit:

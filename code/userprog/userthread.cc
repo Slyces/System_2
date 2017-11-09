@@ -24,25 +24,30 @@ static void StartUserThread(void* schmurtz) {
 
     DEBUG('x', "Writing arg adress : 0x%x to register 4\n", new_schmurtz->arg_adress);
     machine->WriteRegister(4, new_schmurtz->arg_adress);
+    DEBUG('x', "Successfully wrote\n");
+
+    delete new_schmurtz;
 
     // Set the stack register to the end of the address space, where we
     // allocated the stack; but subtract off a bit, to make sure we don't
     // accidentally reference off the end!
+    DEBUG('x', "Allocating stack\n");
     int userStackPtr = currentThread->space->AllocateUserStack();
+    DEBUG('x', "Writing stack pointer to register\n");
     machine->WriteRegister(StackReg, userStackPtr);
-    DEBUG('a', "Initializing stack register to 0x%x\n", userStackPtr);
+    DEBUG('x', "Initializing stack register to 0x%x\n", userStackPtr);
 
     machine->Run();
 }
 
 int do_ThreadCreate(int f, int arg) {
-    struct schmurtz container;
+    struct schmurtz * container = new struct schmurtz;
     Thread *newThread = new Thread("New Thread");
 
-    container.f_adress   = f;
-    container.arg_adress = arg;
+    container->f_adress   = f;
+    container->arg_adress = arg;
 
-    newThread->Start((VoidFunctionPtr) StartUserThread, (void*) &container);
+    newThread->Start((VoidFunctionPtr) StartUserThread, (void*) container);
     return 1;
 }
 
