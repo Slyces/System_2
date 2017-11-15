@@ -6,6 +6,8 @@ struct schmurtz {
     int arg_adress;
 };
 
+static int thread_number = 1;
+
 static void StartUserThread(void* schmurtz) {
     int i;
 
@@ -32,7 +34,8 @@ static void StartUserThread(void* schmurtz) {
     // allocated the stack; but subtract off a bit, to make sure we don't
     // accidentally reference off the end!
     DEBUG('x', "Allocating stack\n");
-    int userStackPtr = currentThread->space->AllocateUserStack();
+    int userStackPtr = currentThread->space->AllocateUserStack(thread_number);
+    thread_number++;
     DEBUG('x', "Writing stack pointer to register\n");
     machine->WriteRegister(StackReg, userStackPtr);
     DEBUG('x', "Initializing stack register to 0x%x\n", userStackPtr);

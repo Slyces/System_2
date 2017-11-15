@@ -29,7 +29,7 @@
 #ifdef CHANGED
 # include "userthread.h"
 
-int thread_number = 0;
+int thread_number = 1;
 Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
 #endif
@@ -205,7 +205,7 @@ ExceptionHandler(ExceptionType which)
           machine->WriteRegister(2,n); // return -1
 
           thread_number++;
-          printf("(%d)", thread_number);
+          // printf("(%d)", thread_number);
 
           threads_mutex->V();
 
@@ -215,7 +215,7 @@ ExceptionHandler(ExceptionType which)
         {
           threads_mutex->P();
           thread_number--;
-          printf("(%d)", thread_number);
+          // printf("(%d)", thread_number);
           if (thread_number == 0)
               interrupt->Halt();
           threads_mutex->V();

@@ -1,9 +1,9 @@
-// bitmap.c 
+// bitmap.c
 //      Routines to manage a bitmap -- an array of bits each of which
 //      can be either on or off.  Represented as an array of integers.
 //
 // Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
@@ -27,7 +27,7 @@ BitMap::BitMap (int nitems)
     numWords = divRoundUp (numBits, BitsInWord);
     map = new unsigned int[numWords];
     for (int i = 0; i < numBits; i++)
-	Clear (i);
+	      Clear (i);
 }
 
 //----------------------------------------------------------------------
@@ -55,6 +55,10 @@ BitMap::Mark (int which)
 {
     ASSERT (which >= 0 && which < numBits);
     map[which / BitsInWord] |= 1 << (which % BitsInWord);
+    // wich / BitsInWord : repérer dans quel entier est stocké le bit which
+    // |= permet de passer dans la représentation de l'entier des bits à 1
+    // 1 est '00000001'. On décale ce 1 de 0 à 7 fois sur la gauche
+    // (car 0 <= which % BitsInWord <= 7 )
 }
 
 //----------------------------------------------------------------------
@@ -69,6 +73,8 @@ BitMap::Clear (int which)
 {
     ASSERT (which >= 0 && which < numBits);
     map[which / BitsInWord] &= ~(1 << (which % BitsInWord));
+    // Même procédé, cette fois ci le bit choisi sera à 0, les autres à 1
+    // et la porte & va donc mettre ce bit à 0
 }
 
 //----------------------------------------------------------------------
@@ -84,9 +90,12 @@ BitMap::Test (int which)
     ASSERT (which >= 0 && which < numBits);
 
     if (map[which / BitsInWord] & (1 << (which % BitsInWord)))
-	return TRUE;
+        // Il n'existe qu'un seul bit à 1 dans (1 << (which % BitsInWord))
+        // Donc pour que cette opération donne un résultat > 0, on doit
+        // avoir ce même bit à 1 dans la représentation de l'entier
+	      return TRUE;
     else
-	return FALSE;
+	      return FALSE;
 }
 
 //----------------------------------------------------------------------
@@ -102,11 +111,11 @@ int
 BitMap::Find ()
 {
     for (int i = 0; i < numBits; i++)
-	if (!Test (i))
-	  {
-	      Mark (i);
-	      return i;
-	  }
+    	if (!Test (i))
+    	  {
+    	      Mark (i);
+    	      return i;
+    	  }
     return -1;
 }
 
