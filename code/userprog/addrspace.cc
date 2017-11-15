@@ -30,6 +30,10 @@
 //      endian machine, and we're now running on a big endian machine.
 // ----------------------------------------------------------------------
 
+#ifdef CHANGED
+#define ThreadStackSize 4 * 256
+#endif //CHANGED
+
 static void
 SwapHeader(NoffHeader *noffH)
 {
@@ -65,6 +69,12 @@ AddrSpace::AddrSpace(OpenFile *executable)
 {
     NoffHeader   noffH;
     unsigned int i, size;
+
+  #if CHANGED
+
+    stackBitMap = new BitMap(UserStacksAreaSize / ThreadStackSize);
+    stackBitMap->Mark(0); // Il existe au moins 1 thread : le main.
+  #endif //CHANGED
 
     executable->ReadAt(&noffH, sizeof(noffH), 0);
 
@@ -208,7 +218,11 @@ AddrSpace::RestoreState()
  * ====================================================================== */
  #ifdef CHANGED
 int
-AddrSpace::AllocateUserStack(int i) {
-    return numPages * PageSize - i * (4 * 256) - 16;
+AddrSpace::AllocateUserStack(int slot_number) {
+    return numPages * PageSize - slot_number * ThreadStackSize - 16;
 }
 #endif //CHANGED
+
+/* ======================================================================
+ *
+ * ====================================================================== */
