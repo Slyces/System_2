@@ -37,7 +37,7 @@ Semaphore::Semaphore (const char *debugName, int initialValue)
 {
     name = debugName;
     value = initialValue;
-    queue = new List;
+    queue = new List();
 }
 
 //----------------------------------------------------------------------
@@ -108,7 +108,7 @@ Lock::Lock (const char *debugName)
     name = debugName;
     #ifdef CHANGED
       owner = NULL;
-      queue = new List;
+      queue = new List();
       depth = 0;
     #endif //CHANGED
 }

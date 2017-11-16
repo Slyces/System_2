@@ -1,13 +1,13 @@
-// list.h 
-//      Data structures to manage LISP-like lists.  
+// list.h
+//      Data structures to manage LISP-like lists.
 //
 //      As in LISP, a list can contain any type of data structure
-//      as an item on the list: thread control blocks, 
+//      as an item on the list: thread control blocks,
 //      pending interrupts, etc.  That is why each item is a "void *",
 //      or in other words, a "pointers to anything".
 //
 // Copyright (c) 1992-1993 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
 #ifndef LIST_H
@@ -29,10 +29,11 @@ class ListElement:dontcopythis
   public:
     ListElement (void *itemPtr, long long sortKey);	// initialize a list element
 
-    ListElement *next;		// next element on list, 
+    ListElement *next;		// next element on list,
     // NULL if this is the last
     long long key;			// priority, for a sorted list
     void *item;			// pointer to item on the list
+
 };
 
 // The following class defines a "list" -- a singly linked list of
@@ -50,10 +51,13 @@ class List:dontcopythis
     void Prepend (void *item);	// Put item at the beginning of the list
     void Append (void *item);	// Put item at the end of the list
     void *Remove ();		// Take item off the front of the list
+    #ifdef CHANGED
+    void Remove(void *item);
+    #endif //CHANGED
 
-    void Mapcar (VoidFunctionPtr func);	// Apply "func" to every element 
+    void Mapcar (VoidFunctionPtr func);	// Apply "func" to every element
     // on the list
-    bool IsEmpty ();		// is the list empty? 
+    bool IsEmpty ();		// is the list empty?
 
 
     // Routines to put/get items on/off list in order (sorted by key)
@@ -61,8 +65,11 @@ class List:dontcopythis
     void *SortedRemove (long long *keyPtr);	// Remove first item from list
 
   private:
-      ListElement * first;	// Head of the list, NULL if list is empty
+    ListElement * first;	// Head of the list, NULL if list is empty
     ListElement *last;		// Last element of list
+    #ifdef CHANGED
+    int length;
+    #endif //CHANGED
 };
 
 #endif // LIST_H

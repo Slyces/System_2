@@ -253,6 +253,7 @@ AddrSpace::RequestStackSlot(bool waiting)
 
     stackBitMap->Mark(freeSlot);
     threadNumber++;
+    printf(">> ++ >> %d\n", threadNumber);
     bitMapLock->Release();
     return freeSlot;
 }
@@ -265,6 +266,7 @@ AddrSpace::ReleaseStackSlot(int slot)
     printf(" >> (-%d)\n", slot);
     stackBitMap->Clear(slot);
     threadNumber--;
+    printf(">> -- >> %d\n", threadNumber);
     slotCondition->Signal(bitMapLock);
     bitMapLock->Release();
 }

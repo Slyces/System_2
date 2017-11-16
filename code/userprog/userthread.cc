@@ -6,6 +6,7 @@
 struct schmurtz {
     int f_adress;
     int arg_adress;
+    int exit_adress;
 };
 
 static void StartUserThread(void* schmurtz) {
@@ -29,6 +30,9 @@ static void StartUserThread(void* schmurtz) {
     machine->WriteRegister(4, new_schmurtz->arg_adress);
     DEBUG('x', "Successfully wrote\n");
 
+    DEBUG('x', "Writing exit adress : 0x%x to register 31\n", new_schmurtz->exit_adress);
+    machine->WriteRegister(31, new_schmurtz->exit_adress);
+
     delete new_schmurtz;
 
     // Set the stack register to the end of the address space, where we
@@ -46,7 +50,7 @@ static void StartUserThread(void* schmurtz) {
 }
 
 int
-do_ThreadCreate(int f, int arg) {
+do_ThreadCreate(int f, int arg, int exit_adress) {
     DEBUG('s', "do Thread Create\n");
     // When no space available, return -1
     struct schmurtz * container = new struct schmurtz;
@@ -64,6 +68,7 @@ do_ThreadCreate(int f, int arg) {
 
     container->f_adress   = f;
     container->arg_adress = arg;
+    container->exit_adress = exit_adress;
 
     newThread->Start((VoidFunctionPtr) StartUserThread, (void*) container);
     // currentThread->Yield();
@@ -71,7 +76,7 @@ do_ThreadCreate(int f, int arg) {
 }
 
 int
-do_WaitingThreadCreate(int f, int arg) {
+do_WaitingThreadCreate(int f, int arg, int exit_adress) {
     DEBUG('s', "do Waiting Thread Create\n");
     struct schmurtz * container = new struct schmurtz;
 
@@ -85,6 +90,7 @@ do_WaitingThreadCreate(int f, int arg) {
 
     container->f_adress   = f;
     container->arg_adress = arg;
+    container->exit_adress = exit_adress;
 
     newThread->Start((VoidFunctionPtr) StartUserThread, (void*) container);
     // currentThread->Yield();

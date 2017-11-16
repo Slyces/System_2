@@ -147,7 +147,7 @@ Fork:
 	.end Yield
 
 /*
- * Fonction utilisateur (Action 4.2)
+ * Fonctions utilisateur
  */
 
   .globl PutChar
@@ -202,6 +202,7 @@ PutInt:
   .ent	ThreadCreate
 ThreadCreate:
   addiu $2,$0,SC_ThreadCreate
+  addiu $6,$0,ThreadExit
   syscall
   j	$31
   .end ThreadCreate
@@ -210,6 +211,7 @@ ThreadCreate:
   .ent	WaitingThreadCreate
 WaitingThreadCreate:
   addiu $2,$0,SC_WaitingThreadCreate
+  addiu	$6,$0,ThreadExit
   syscall
   j	$31
   .end WaitingThreadCreate
@@ -221,6 +223,30 @@ ThreadExit:
   syscall
   j	$31
   .end ThreadExit
+
+  .globl NewSemaphore
+  .ent	NewSemaphore
+NewSemaphore:
+  addiu $2,$0,SC_NewSemaphore
+  syscall
+  j	$31
+  .end NewSemaphore
+
+  .globl P
+  .ent	P
+P:
+  addiu $2,$0,SC_P
+  syscall
+  j	$31
+  .end P
+
+  .globl V
+  .ent	V
+V:
+  addiu $2,$0,SC_V
+  syscall
+  j	$31
+  .end V
 
   /*
    * Endfunction

@@ -31,6 +31,9 @@
 
 Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
+Lock * semListLock = new Lock("Semaphore List Lock");
+List * semList = new List();
+
 #endif
 
 // ----------------------------------------------------------------------
@@ -197,14 +200,13 @@ ExceptionHandler(ExceptionType which)
           DEBUG('s', "ThreadCreate\n");
           int f_adress = machine->ReadRegister(4);
           int arg_adress = machine->ReadRegister(5);
+          int exit_adress = machine->ReadRegister(6);
 
           threads_mutex->P();
-
-          int n = do_ThreadCreate(f_adress, arg_adress);
+          int n = do_ThreadCreate(f_adress, arg_adress, exit_adress);
           if (n == -1)
               DEBUG('s', "Thread not created : no stack slot available");
           machine->WriteRegister(2, n); // return 1 if created, -1 if not
-
           threads_mutex->V();
           break;
         }
@@ -214,10 +216,11 @@ ExceptionHandler(ExceptionType which)
           DEBUG('s', "ThreadCreate\n");
           int f_adress = machine->ReadRegister(4);
           int arg_adress = machine->ReadRegister(5);
+          int exit_adress = machine->ReadRegister(6);
 
           threads_mutex->P();
 
-          int n = do_WaitingThreadCreate(f_adress, arg_adress);
+          int n = do_WaitingThreadCreate(f_adress, arg_adress, exit_adress);
           if (n == -1)
               DEBUG('s', "Thread not created : no stack slot available");
           machine->WriteRegister(2, n); // return 1 if created, -1 if not
@@ -228,15 +231,46 @@ ExceptionHandler(ExceptionType which)
 
         case SC_ThreadExit:
         {
-          do_ThreadExit();
+          DEBUG('s', "Thread Exit\n");
+          if (currentThread->space->IsLastThread())
+              interrupt->Halt();
+          else do_ThreadExit();
           break;
         }
 
         case SC_Exit:
         {
             DEBUG('s', "Exit\n");
-            interrupt->Exit();
+            if (currentThread->space->IsLastThread())
+                interrupt->Halt();
+            else do_ThreadExit();
             break;
+        }
+
+        case SC_NewSemaphore:
+        {
+            DEBUG('s', "New Semaphore\n");
+            const char * debug_name = (char *) machine->ReadRegister(4);
+            int initial_value = machine->ReadRegister(5);
+
+            semListLock->Acquire();
+            semList->Append(new Semaphore(debug_name, initial_value));
+
+            semListLock->Release();
+
+            break;
+        }
+
+        case SC_P:
+        {
+            DEBUG('s', "P\n");
+            // Pass
+        }
+
+        case SC_V:
+        {
+            DEBUG('s', "V\n");
+            // Pass
         }
         #endif // CHANGED
 

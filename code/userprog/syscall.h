@@ -42,11 +42,15 @@
 # define SC_ThreadCreate          17
 # define SC_ThreadExit            18
 # define SC_WaitingThreadCreate   19
+# define SC_NewSemaphore          20
+# define SC_P                     21
+# define SC_V                     22
 #endif // ifdef CHANGED
 
 #ifdef IN_USER_MODE
 
 # ifdef CHANGED
+typedef int sem_t;
 
 void PutString(char * string);
 void PutChar(char c);
@@ -56,6 +60,9 @@ void PutInt(int k);
 int ThreadCreate(void (*f) (void *arg), void *arg);
 int WaitingThreadCreate(void (*f) (void *arg), void *arg);
 void ThreadExit(void);
+sem_t NewSemaphore(char * name, int init_value);
+void P(sem_t semaphore);
+void V(sem_t sempahore);
 # endif // ifdef CHANGED
 
 // LB: This part is read only on compiling the test/*.c files.
