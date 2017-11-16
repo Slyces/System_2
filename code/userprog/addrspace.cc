@@ -30,10 +30,6 @@
 //      endian machine, and we're now running on a big endian machine.
 // ----------------------------------------------------------------------
 
-#ifdef CHANGED
-#define ThreadStackSize 4 * 256
-#endif //CHANGED
-
 static void
 SwapHeader(NoffHeader *noffH)
 {
@@ -71,8 +67,11 @@ AddrSpace::AddrSpace(OpenFile *executable)
     unsigned int i, size;
 
   #if CHANGED
-
-    stackBitMap = new BitMap(UserStacksAreaSize / ThreadStackSize);
+    threadNumber = 0;
+    bitMapLock = new Lock("UserStack's Bit Map Lock");
+    slotCondition = new Condition("Condition Lock for threads waiting a free slot");
+    int max_slot_number = UserStacksAreaSize / ThreadStackSize;
+    stackBitMap = new BitMap(max_slot_number);
     stackBitMap->Mark(0); // Il existe au moins 1 thread : le main.
   #endif //CHANGED
 
@@ -152,6 +151,11 @@ AddrSpace::~AddrSpace()
     delete[] pageTable;
 
     // End of modification
+    #ifdef CHANGED
+    delete stackBitMap;
+    delete bitMapLock;
+    delete slotCondition;
+    #endif
 }
 
 // ----------------------------------------------------------------------
@@ -218,11 +222,58 @@ AddrSpace::RestoreState()
  * ====================================================================== */
  #ifdef CHANGED
 int
-AddrSpace::AllocateUserStack(int slot_number) {
-    return numPages * PageSize - slot_number * ThreadStackSize - 16;
+AddrSpace::AllocateUserStack(int slot) {
+    // les threads ont un slot_number > 0
+    return numPages * PageSize - slot * ThreadStackSize - 16;
 }
 #endif //CHANGED
 
 /* ======================================================================
- *
+ * Action 2.4
  * ====================================================================== */
+
+// Renvoie -1 si il n'y a pas d'emplacement disponible.
+int
+AddrSpace::RequestStackSlot(bool waiting)
+{
+    bitMapLock->Acquire();
+    // Section critique pour garantir 1 seul thread par emplacement
+
+    int freeSlot;
+    while ((freeSlot = stackBitMap->Find()) == -1) {
+      // Find retourne -1 quand tous les bits sont marqués
+      if (!waiting) {
+        bitMapLock->Release();
+        return -1;
+      } else slotCondition->Wait(bitMapLock);
+    }
+    DEBUG('z', "Acquiring slot number : %d\n", freeSlot);
+
+    printf(" >> (+%d)\n", freeSlot);
+
+    stackBitMap->Mark(freeSlot);
+    threadNumber++;
+    bitMapLock->Release();
+    return freeSlot;
+}
+
+void
+AddrSpace::ReleaseStackSlot(int slot)
+{
+    bitMapLock->Acquire();
+    DEBUG('s', "Releasing on bit %d", slot);
+    printf(" >> (-%d)\n", slot);
+    stackBitMap->Clear(slot);
+    threadNumber--;
+    slotCondition->Signal(bitMapLock);
+    bitMapLock->Release();
+}
+
+bool
+AddrSpace::IsLastThread()
+{
+  bitMapLock->Acquire();
+  int n = threadNumber;
+  bitMapLock->Release();
+  return n == 0;
+}

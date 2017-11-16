@@ -15,7 +15,7 @@ void thread_test(void* array) {
 
 int main() {
     int char_thread, i;
-    int n = 15;
+    int n = 26;
     int array[n][1];
     for(i = 0; i < n; i++) {
       array[i][0] = i + 1;
@@ -23,7 +23,7 @@ int main() {
 
     // PutString(">> Main :: pre-creation\n\n");
     for (i = 0; i < n; i++) {
-      char_thread = ThreadCreate(thread_test, array[i]);
+      char_thread = WaitingThreadCreate(thread_test, array[i]);
     }
     // PutString("\n\n>> Main :: post-creation\n\n");
     // PutString(">> Main :: random dashes ---------------------------------------------------------------------------\n");

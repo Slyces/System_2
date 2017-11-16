@@ -45,7 +45,7 @@ Thread::Thread(const char *threadName)
     stack    = NULL;
     status   = JUST_CREATED;
 #ifdef USER_PROGRAM
-
+    slot = 0;
     if (currentThread)
         // Inherit space from father
         space = currentThread->space;
@@ -106,7 +106,7 @@ Thread::~Thread()
 void
 Thread::Start(VoidFunctionPtr func, void *arg)
 {
-    DEBUG('t', "Starting thread \"%s\" with func = %p, arg = %d\n",
+    DEBUG('x', "Starting thread \"%s\" with func = %p, arg = %d\n",
           name, func, arg);
 
     ASSERT(status == JUST_CREATED);
@@ -431,8 +431,19 @@ Thread::SaveUserState()
 void
 Thread::RestoreUserState()
 {
-    for (int i = 0; i < NumTotalRegs; i++) machine->WriteRegister(i,
-                                                                  userRegisters[i]);
+    for (int i = 0; i < NumTotalRegs; i++)
+        machine->WriteRegister(i, userRegisters[i]);
 }
 
+int
+Thread::getSlot()
+{
+  return slot;
+}
+
+void
+Thread::setSlot(int new_slot)
+{
+  slot = new_slot;
+}
 #endif // ifdef USER_PROGRAM

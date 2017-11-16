@@ -206,6 +206,14 @@ ThreadCreate:
   j	$31
   .end ThreadCreate
 
+  .globl WaitingThreadCreate
+  .ent	WaitingThreadCreate
+WaitingThreadCreate:
+  addiu $2,$0,SC_WaitingThreadCreate
+  syscall
+  j	$31
+  .end WaitingThreadCreate
+
   .globl ThreadExit
   .ent	ThreadExit
 ThreadExit:

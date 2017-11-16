@@ -16,8 +16,15 @@
 #include "copyright.h"
 #include "filesys.h"
 #include "translate.h"
+#include "bitmap.h"
 
-#define UserStacksAreaSize		(1024 * 4)	// increase this as necessary!
+class Lock;
+class Condition;
+
+#ifdef CHANGED
+#define ThreadStackSize 256
+#define UserStacksAreaSize  (ThreadStackSize * 16)	// increase this as necessary!
+#endif //CHANGED
 
 class AddrSpace:dontcopythis
 {
@@ -34,7 +41,10 @@ class AddrSpace:dontcopythis
     void RestoreState ();	// info on a context switch
 
     #ifdef CHANGED
-    int AllocateUserStack(int i);
+    int AllocateUserStack(int slot);
+    int RequestStackSlot(bool waiting);
+    void ReleaseStackSlot(int slot);
+    bool IsLastThread();
     #endif //CHANGED
 
   private:
@@ -45,6 +55,9 @@ class AddrSpace:dontcopythis
 
   #ifdef CHANGED
     BitMap * stackBitMap;
+    Lock * bitMapLock;
+    Condition * slotCondition;
+    int threadNumber;
   #endif
 };
 

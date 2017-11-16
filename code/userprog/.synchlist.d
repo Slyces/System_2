@@ -4,4 +4,4 @@
  ../threads/synch.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../machine/translate.h
+ ../machine/translate.h ../userprog/bitmap.h ../filesys/openfile.h

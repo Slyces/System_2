@@ -1,14 +1,15 @@
 #ifdef CHANGED
 # include "userthread.h"
 
+
+
 struct schmurtz {
     int f_adress;
     int arg_adress;
 };
 
-static int thread_number = 1;
-
 static void StartUserThread(void* schmurtz) {
+    DEBUG('s', "StartUserThread\n");
     int i;
 
     struct schmurtz *new_schmurtz = (struct schmurtz *) schmurtz;
@@ -33,9 +34,10 @@ static void StartUserThread(void* schmurtz) {
     // Set the stack register to the end of the address space, where we
     // allocated the stack; but subtract off a bit, to make sure we don't
     // accidentally reference off the end!
+
     DEBUG('x', "Allocating stack\n");
-    int userStackPtr = currentThread->space->AllocateUserStack(thread_number);
-    thread_number++;
+
+    int userStackPtr = currentThread->space->AllocateUserStack(currentThread->getSlot());
     DEBUG('x', "Writing stack pointer to register\n");
     machine->WriteRegister(StackReg, userStackPtr);
     DEBUG('x', "Initializing stack register to 0x%x\n", userStackPtr);
@@ -43,23 +45,62 @@ static void StartUserThread(void* schmurtz) {
     machine->Run();
 }
 
-int do_ThreadCreate(int f, int arg) {
-
+int
+do_ThreadCreate(int f, int arg) {
+    DEBUG('s', "do Thread Create\n");
+    // When no space available, return -1
     struct schmurtz * container = new struct schmurtz;
+
     Thread *newThread = new Thread("New Thread");
+
+    int slot = newThread->space->RequestStackSlot(false);
+    // Not waiting
+    if (slot == -1) {
+        DEBUG('s', "No slot available\n");
+        return -1;
+    }
+    newThread->setSlot(slot);
+    DEBUG('s', "Selected slot %d\n", slot);
 
     container->f_adress   = f;
     container->arg_adress = arg;
 
     newThread->Start((VoidFunctionPtr) StartUserThread, (void*) container);
-    return 1;
+    // currentThread->Yield();
+    return 0;
+}
+
+int
+do_WaitingThreadCreate(int f, int arg) {
+    DEBUG('s', "do Waiting Thread Create\n");
+    struct schmurtz * container = new struct schmurtz;
+
+    Thread *newThread = new Thread("New Thread");
+
+    int slot = newThread->space->RequestStackSlot(true);
+    // true = waiting
+    // May wait if no slot is available. Always has a slot when reaching here
+    newThread->setSlot(slot);
+    DEBUG('s', "Selected slot %d\n", slot);
+
+    container->f_adress   = f;
+    container->arg_adress = arg;
+
+    newThread->Start((VoidFunctionPtr) StartUserThread, (void*) container);
+    // currentThread->Yield();
+    return 0;
 }
 
 int do_ThreadExit() {
+    DEBUG('s', "ThreadExit\n");
+    if(currentThread->space->IsLastThread())
+        interrupt->Halt();
+
+    int slot = currentThread->getSlot();
+    DEBUG('s', "Exiting the thread at slot %d\n", slot);
+    currentThread->space->ReleaseStackSlot(slot);
     currentThread->Finish();
     // On ne sait pas si d'autres threads utilisent cet espace d'adressage
     return 1;
 }
-
-
 #endif //CHANGED

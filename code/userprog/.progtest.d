@@ -3,8 +3,8 @@
  ../machine/sysdep.h ../threads/thread.h ../machine/machine.h \
  ../threads/utility.h ../machine/translate.h ../machine/disk.h \
  ../userprog/addrspace.h ../filesys/filesys.h ../filesys/openfile.h \
- ../machine/translate.h ../threads/scheduler.h ../threads/list.h \
- ../machine/interrupt.h ../threads/list.h ../machine/stats.h \
- ../machine/timer.h ../userprog/synchconsole.h ../machine/console.h \
- ../userprog/syscall.h ../threads/synch.h ../threads/synch.h addrspace.h \
- synchconsole.h
+ ../machine/translate.h ../userprog/bitmap.h ../filesys/openfile.h \
+ ../threads/scheduler.h ../threads/list.h ../machine/interrupt.h \
+ ../threads/list.h ../machine/stats.h ../machine/timer.h \
+ ../userprog/synchconsole.h ../machine/console.h ../userprog/syscall.h \
+ ../threads/synch.h ../threads/synch.h addrspace.h synchconsole.h

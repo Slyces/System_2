@@ -29,7 +29,6 @@
 #ifdef CHANGED
 # include "userthread.h"
 
-int thread_number = 1;
 Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
 #endif
@@ -202,23 +201,33 @@ ExceptionHandler(ExceptionType which)
           threads_mutex->P();
 
           int n = do_ThreadCreate(f_adress, arg_adress);
-          machine->WriteRegister(2,n); // return -1
-
-          thread_number++;
-          // printf("(%d)", thread_number);
+          if (n == -1)
+              DEBUG('s', "Thread not created : no stack slot available");
+          machine->WriteRegister(2, n); // return 1 if created, -1 if not
 
           threads_mutex->V();
-
           break;
         }
+
+        case SC_WaitingThreadCreate:
+        {
+          DEBUG('s', "ThreadCreate\n");
+          int f_adress = machine->ReadRegister(4);
+          int arg_adress = machine->ReadRegister(5);
+
+          threads_mutex->P();
+
+          int n = do_WaitingThreadCreate(f_adress, arg_adress);
+          if (n == -1)
+              DEBUG('s', "Thread not created : no stack slot available");
+          machine->WriteRegister(2, n); // return 1 if created, -1 if not
+
+          threads_mutex->V();
+          break;
+        }
+
         case SC_ThreadExit:
         {
-          threads_mutex->P();
-          thread_number--;
-          // printf("(%d)", thread_number);
-          if (thread_number == 0)
-              interrupt->Halt();
-          threads_mutex->V();
           do_ThreadExit();
           break;
         }
