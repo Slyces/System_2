@@ -29,10 +29,12 @@
 #ifdef CHANGED
 # include "userthread.h"
 
+typedef int sem_t;
+
 Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
-Lock * semListLock = new Lock("Semaphore List Lock");
-List * semList = new List();
+Lock * semaphoresLock = new Lock("Semaphore List Lock");
+IndexedList * semaphoresList = new IndexedList();
 
 #endif
 
@@ -97,7 +99,7 @@ ExceptionHandler(ExceptionType which)
         case SC_PutChar:
         {
             char_stack_lock->P();
-            DEBUG('s', "PutChar\n");
+            // DEBUG('s', "PutChar\n");
             int c = machine->ReadRegister(4); // information stockée dans r4
             synchconsole->SynchPutChar(c);
             char_stack_lock->V();
@@ -250,27 +252,54 @@ ExceptionHandler(ExceptionType which)
         case SC_NewSemaphore:
         {
             DEBUG('s', "New Semaphore\n");
-            const char * debug_name = (char *) machine->ReadRegister(4);
+            char * debug_name = (char *) machine->ReadRegister(4);
             int initial_value = machine->ReadRegister(5);
 
-            semListLock->Acquire();
-            semList->Append(new Semaphore(debug_name, initial_value));
+            semaphoresLock->Acquire();
+            Semaphore * new_sem = new Semaphore("debug_name", initial_value);
+            sem_t key = semaphoresList->Insert(new_sem);
+            semaphoresLock->Release();
+            machine->WriteRegister(2, (int) key);
+            break;
+        }
 
-            semListLock->Release();
+        case SC_DeleteSemaphore:
+        {
+            DEBUG('s', "Delete Semaphore\n");
+            sem_t key = (sem_t) machine->ReadRegister(4);
+            semaphoresLock->Acquire();
+
+            Semaphore * sem = (Semaphore *) semaphoresList->Remove((int) key);
+            delete sem;
+            semaphoresLock->Release();
 
             break;
         }
 
         case SC_P:
         {
-            DEBUG('s', "P\n");
-            // Pass
+            DEBUG('s', "Entering P\n");
+            sem_t key = machine->ReadRegister(4);
+
+            semaphoresLock->Acquire();
+            Semaphore * sem = (Semaphore *) semaphoresList->Find(key);
+            sem->P();
+            semaphoresLock->Release();
+            DEBUG('s', "Exiting P %d\n", key);
+            break;
         }
 
         case SC_V:
         {
-            DEBUG('s', "V\n");
-            // Pass
+            DEBUG('s', "Entering V\n");
+            sem_t key = machine->ReadRegister(4);
+
+            semaphoresLock->Acquire();
+            Semaphore * sem = (Semaphore *) semaphoresList->Find(key);
+            sem->V();
+            semaphoresLock->Release();
+            DEBUG('s', "Exiting V %d\n", key);
+            break;
         }
         #endif // CHANGED
 

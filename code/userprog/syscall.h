@@ -40,11 +40,12 @@
 # define SC_GetInt                15
 # define SC_PutInt                16
 # define SC_ThreadCreate          17
-# define SC_ThreadExit            18
-# define SC_WaitingThreadCreate   19
+# define SC_WaitingThreadCreate   18
+# define SC_ThreadExit            19
 # define SC_NewSemaphore          20
-# define SC_P                     21
-# define SC_V                     22
+# define SC_DeleteSemaphore       21
+# define SC_P                     22
+# define SC_V                     23
 #endif // ifdef CHANGED
 
 #ifdef IN_USER_MODE
@@ -61,6 +62,7 @@ int ThreadCreate(void (*f) (void *arg), void *arg);
 int WaitingThreadCreate(void (*f) (void *arg), void *arg);
 void ThreadExit(void);
 sem_t NewSemaphore(char * name, int init_value);
+void DeleteSemaphore(sem_t key);
 void P(sem_t semaphore);
 void V(sem_t sempahore);
 # endif // ifdef CHANGED

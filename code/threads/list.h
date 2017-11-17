@@ -51,9 +51,6 @@ class List:dontcopythis
     void Prepend (void *item);	// Put item at the beginning of the list
     void Append (void *item);	// Put item at the end of the list
     void *Remove ();		// Take item off the front of the list
-    #ifdef CHANGED
-    void Remove(void *item);
-    #endif //CHANGED
 
     void Mapcar (VoidFunctionPtr func);	// Apply "func" to every element
     // on the list
@@ -71,5 +68,46 @@ class List:dontcopythis
     int length;
     #endif //CHANGED
 };
+
+#ifdef CHANGED
+
+class IndexedElement
+{
+  public:
+    IndexedElement (void *itemPtr, int sortKey);	// initialize a list element
+    ~IndexedElement();
+    void InsertAfter (IndexedElement *elt);
+    void InsertBefore (IndexedElement *elt);
+    void Detach();
+
+    IndexedElement *next;		// next element on list,
+    IndexedElement *prev;   // previous element on list
+    // NULL if this is the last
+    int key;			// priority, for a sorted list
+    void *item;			// pointer to item on the list
+};
+
+class IndexedList
+{
+public:
+  IndexedList ();			// initialize the list
+  ~IndexedList ();			// de-allocate the list
+
+  // on the list
+  bool IsEmpty ();		// is the list empty?
+
+  int Insert (void *item);	// Put item into first key available
+  void *Remove (int key);	// Remove the item of given key
+  void *Find (int key);		// Gets the item of given key
+
+private:
+  bool Select(int key);
+
+  IndexedElement *current;
+  IndexedElement *first;	// Head of the list, NULL if list is empty
+  IndexedElement *last;		// Last element of list
+};
+
+#endif //CHANGED
 
 #endif // LIST_H

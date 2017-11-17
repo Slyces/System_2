@@ -232,6 +232,14 @@ NewSemaphore:
   j	$31
   .end NewSemaphore
 
+  .globl DeleteSemaphore
+  .ent	DeleteSemaphore
+DeleteSemaphore:
+  addiu $2,$0,SC_DeleteSemaphore
+  syscall
+  j	$31
+  .end DeleteSemaphore
+
   .globl P
   .ent	P
 P:
