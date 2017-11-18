@@ -271,6 +271,7 @@ ExceptionHandler(ExceptionType which)
 
             Semaphore * sem = (Semaphore *) semaphoresList->Remove((int) key);
             delete sem;
+
             semaphoresLock->Release();
 
             break;
