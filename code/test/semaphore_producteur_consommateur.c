@@ -8,6 +8,7 @@ producteur(void* array) {
     sem_t sem_prod = (sem_t) ((int *) array)[1];
     sem_t sem_cons = (sem_t) ((int *) array)[2];
     P(sem_prod);
+    V(sem_cons);
 }
 
 void
@@ -15,7 +16,8 @@ consommateur(void* array) {
     int id = ((int*) array)[0];
     sem_t sem_prod = (sem_t) ((int *) array)[1];
     sem_t sem_cons = (sem_t) ((int *) array)[2];
-
+    P(sem_cons);
+    V(sem_prod);
 }
 
 int main() {
@@ -25,6 +27,7 @@ int main() {
     int array_prod[n_prod][3];
     int array_cons[n_cons][3];
 
+    //CReated indexed list
     sem_t sem_prod = NewSemaphore("Semaphore producteur", 1);
     sem_t sem_cons = NewSemaphore("Semaphore consommateur", 0);
 
@@ -47,5 +50,7 @@ int main() {
     for (i = 0; i < n_cons; i++) {
       char_thread = WaitingThreadCreate(consommateur, array_cons[i]);
     }
+
+
     return 1;
 }
