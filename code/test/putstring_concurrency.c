@@ -7,17 +7,13 @@ void thread_test(void* array) {
     PutString("_[Thread start]_");
 
     for (i = 0; i < n; i++) {
-      /* code */
       PutChar('0' + id);
-      // PutChar('+');
     }
 
     PutString("_[Thread middle]_");
 
     for (i = 0; i < n; i++) {
-      /* code */
       PutChar('0' + id);
-      // PutChar('+');
     }
 
     printf("_[Thread end]_");
@@ -38,7 +34,6 @@ int main() {
       char_thread = ThreadCreate(thread_test, array[i]);
     }
     PutString("\n\n>> Main :: post-creation\n\n");
-    // PutString(">> Main :: random dashes ---------------------------------------------------------------------------\n");
     ThreadExit();
     return 1;
 }

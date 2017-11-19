@@ -6,7 +6,6 @@ void thread_test(void* array) {
     int n = 10;
 
     for (i = 0; i < n; i++) {
-      /* code */
       PutChar('a' + id - 1);
     }
 
@@ -26,7 +25,6 @@ int main() {
       char_thread = WaitingThreadCreate(thread_test, array[i]);
     }
     // PutString("\n\n>> Main :: post-creation\n\n");
-    // PutString(">> Main :: random dashes ---------------------------------------------------------------------------\n");
     ThreadExit();
     return 1;
 }

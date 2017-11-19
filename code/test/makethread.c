@@ -38,7 +38,6 @@ int main() {
       char_thread = ThreadCreate(thread_test, array[i]);
     }
     PutString(">> Main :: post-creation\n");
-    // PutString(">> Main :: random dashes ---------------------------------------------------------------------------\n");
     ThreadExit();
     return 1;
 }

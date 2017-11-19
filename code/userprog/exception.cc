@@ -282,7 +282,7 @@ ExceptionHandler(ExceptionType which)
             sem_t key = machine->ReadRegister(4);
 
             semaphoresLock->Acquire();
-            Semaphore * sem = (Semaphore *) semaphoresList->Find(key);
+            Semaphore * sem = (Semaphore *) semaphoresList->Find(key); 
             sem->P();
             semaphoresLock->Release();
             DEBUG('s', "Exiting P %d\n", key);
