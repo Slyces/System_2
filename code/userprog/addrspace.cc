@@ -67,13 +67,14 @@ AddrSpace::AddrSpace(OpenFile *executable)
     unsigned int i, size;
 
   #if CHANGED
-    threadNumber = 0;
-    bitMapLock = new Lock("UserStack's Bit Map Lock");
-    slotCondition = new Condition("Condition Lock for threads waiting a free slot");
+    threadNumber  = 0;
+    bitMapLock    = new Lock("UserStack's Bit Map Lock");
+    slotCondition =
+        new Condition("Condition Lock for threads waiting a free slot");
     int max_slot_number = UserStacksAreaSize / ThreadStackSize;
     stackBitMap = new BitMap(max_slot_number);
     stackBitMap->Mark(0); // Il existe au moins 1 thread : le main.
-  #endif //CHANGED
+  #endif // CHANGED
 
     executable->ReadAt(&noffH, sizeof(noffH), 0);
 
@@ -104,7 +105,10 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
     for (i = 0; i < numPages; i++)
     {
-        pageTable[i].physicalPage = i; // for now, phys page # = virtual page #
+        #ifdef CHANGED
+        pageTable[i].physicalPage = i + 1;
+        #endif //CHANGED
+        // pageTable[i].physicalPage = i; // for now, phys page # = virtual page #
         pageTable[i].valid        = TRUE;
         pageTable[i].use          = FALSE;
         pageTable[i].dirty        = FALSE;
@@ -119,16 +123,24 @@ AddrSpace::AddrSpace(OpenFile *executable)
     {
         DEBUG('a', "Initializing code segment, at 0x%x, size 0x%x\n",
               noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
-                           noffH.code.size, noffH.code.inFileAddr);
+        #ifdef CHANGED
+        ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size,
+                      noffH.code.inFileAddr, pageTable, numPages);
+        #endif // CHANGED
+        // executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
+        //  noffH.code.size, noffH.code.inFileAddr);
     }
 
     if (noffH.initData.size > 0)
     {
         DEBUG('a', "Initializing data segment, at 0x%x, size 0x%x\n",
               noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
-                           noffH.initData.size, noffH.initData.inFileAddr);
+        #ifdef CHANGED
+        ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size,
+                      noffH.initData.inFileAddr, pageTable, numPages);
+        #endif // CHANGED
+        // executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
+        //                    noffH.initData.size, noffH.initData.inFileAddr);
     }
 
     DEBUG('a', "Area for stacks at 0x%x, size 0x%x\n",
@@ -153,7 +165,7 @@ AddrSpace::~AddrSpace()
     delete stackBitMap;
     delete bitMapLock;
     delete slotCondition;
-    #endif
+    #endif // ifdef CHANGED
 }
 
 // ----------------------------------------------------------------------
@@ -234,15 +246,17 @@ int
 AddrSpace::RequestStackSlot(bool waiting)
 {
     bitMapLock->Acquire();
+
     // Section critique pour garantir 1 seul thread par emplacement
 
     int freeSlot;
+
     while ((freeSlot = stackBitMap->Find()) == -1) {
-      // Find retourne -1 quand tous les bits sont marqués
-      if (!waiting) {
-        bitMapLock->Release();
-        return -1;
-      } else slotCondition->Wait(bitMapLock);
+        // Find retourne -1 quand tous les bits sont marqués
+        if (!waiting) {
+            bitMapLock->Release();
+            return -1;
+        } else slotCondition->Wait(bitMapLock);
     }
     DEBUG('z', "Acquiring slot number : %d\n", freeSlot);
 
@@ -271,20 +285,43 @@ AddrSpace::ReleaseStackSlot(int slot)
 bool
 AddrSpace::IsLastThread()
 {
-  bitMapLock->Acquire();
-  int n = threadNumber;
-  bitMapLock->Release();
-  return n == 0;
+    bitMapLock->Acquire();
+    int n = threadNumber;
+    bitMapLock->Release();
+    return n == 0;
 }
 
 /* ============================================================================
  * TP 03
- * ============================================================================ */
- static void
- AddrSpace::ReadAtVirtual(OpenFile         *executable,
-                          int               virtualaddr,
-                          int               numBytes,
-                          int               position,
-                          TranslationEntry *pageTable,
-                          unsigned          numPages)
-#endif //CHANGED
+ * ============================================================================
+ **/
+void
+AddrSpace::ReadAtVirtual(OpenFile         *executable,
+              int               virtualaddr,
+              int               numBytes,
+              int               position,
+              TranslationEntry *pageTable,
+              unsigned          numPages)
+{
+    // Backup of machine's state
+    TranslationEntry *pageTableBackup = machine->pageTable;
+    unsigned numPagesBackup           = machine->pageTableSize;
+
+    // Changing machine state to read
+    machine->pageTable     = pageTable;
+    machine->pageTableSize = numPages;
+
+    char buffer[numBytes];
+
+    int numRead = executable->ReadAt(buffer, numBytes, position);
+
+    for (int i = 0; i < numRead; i++) {
+        machine->WriteMem(virtualaddr + i, 1, (int)buffer[i]);
+    }
+
+    // Restoring the machine's state
+    machine->pageTable     = pageTableBackup;
+    machine->pageTableSize = numPagesBackup;
+}
+
+#endif // CHANGED
