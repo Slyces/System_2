@@ -260,11 +260,11 @@ AddrSpace::RequestStackSlot(bool waiting)
     }
     DEBUG('z', "Acquiring slot number : %d\n", freeSlot);
 
-    printf(" >> (+%d)\n", freeSlot);
+    // printf(" >> (+%d)\n", freeSlot);
 
     stackBitMap->Mark(freeSlot);
     threadNumber++;
-    printf(">> ++ >> %d\n", threadNumber);
+    // printf(">> ++ >> %d\n", threadNumber);
     bitMapLock->Release();
     return freeSlot;
 }
@@ -274,10 +274,10 @@ AddrSpace::ReleaseStackSlot(int slot)
 {
     bitMapLock->Acquire();
     DEBUG('s', "Releasing on bit %d", slot);
-    printf(" >> (-%d)\n", slot);
+    // printf(" >> (-%d)\n", slot);
     stackBitMap->Clear(slot);
     threadNumber--;
-    printf(">> -- >> %d\n", threadNumber);
+    // printf(">> -- >> %d\n", threadNumber);
     slotCondition->Signal(bitMapLock);
     bitMapLock->Release();
 }
