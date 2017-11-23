@@ -127,9 +127,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     {
         DEBUG('a', "Initializing data segment, at 0x%x, size 0x%x\n",
               noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&
-                           (machine->mainMemory
-                            [noffH.initData.virtualAddr]),
+        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
                            noffH.initData.size, noffH.initData.inFileAddr);
     }
 
@@ -226,7 +224,6 @@ AddrSpace::AllocateUserStack(int slot) {
     // les threads ont un slot_number > 0
     return numPages * PageSize - slot * ThreadStackSize - 16;
 }
-#endif //CHANGED
 
 /* ======================================================================
  * Action 2.4
@@ -279,3 +276,15 @@ AddrSpace::IsLastThread()
   bitMapLock->Release();
   return n == 0;
 }
+
+/* ============================================================================
+ * TP 03
+ * ============================================================================ */
+ static void
+ AddrSpace::ReadAtVirtual(OpenFile         *executable,
+                          int               virtualaddr,
+                          int               numBytes,
+                          int               position,
+                          TranslationEntry *pageTable,
+                          unsigned          numPages)
+#endif //CHANGED
