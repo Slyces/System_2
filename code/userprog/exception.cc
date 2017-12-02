@@ -33,8 +33,7 @@ typedef int sem_t;
 
 Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
-Lock * semaphoresLock = new Lock("Semaphore List Lock");
-IndexedList * semaphoresList = new IndexedList();
+UserSemaphore user_semaphores = new UserSemaphore(8);
 
 #endif
 
@@ -260,12 +259,9 @@ ExceptionHandler(ExceptionType which)
             DEBUG('s', "New Semaphore\n");
             char * debug_name = (char *) machine->ReadRegister(4);
             int initial_value = machine->ReadRegister(5);
-
-            semaphoresLock->Acquire();
             Semaphore * new_sem = new Semaphore("debug_name", initial_value);
-            sem_t key = semaphoresList->Insert(new_sem);
-            semaphoresLock->Release();
-            machine->WriteRegister(2, (int) key);
+            sem_t key = user_semaphores->Add(new_sem);
+            machine->WriteRegister(2, key);
             break;
         }
 
@@ -273,13 +269,7 @@ ExceptionHandler(ExceptionType which)
         {
             DEBUG('s', "Delete Semaphore\n");
             sem_t key = (sem_t) machine->ReadRegister(4);
-            semaphoresLock->Acquire();
-
-            Semaphore * sem = (Semaphore *) semaphoresList->Remove((int) key);
-            delete sem;
-
-            semaphoresLock->Release();
-
+            user_semaphores->Remove(key);
             break;
         }
 
@@ -287,11 +277,8 @@ ExceptionHandler(ExceptionType which)
         {
             DEBUG('s', "Entering P\n");
             sem_t key = machine->ReadRegister(4);
-
-            semaphoresLock->Acquire();
-            Semaphore * sem = (Semaphore *) semaphoresList->Find(key);
+            Semaphore * sem = user_semaphores->Get(key);
             sem->P();
-            semaphoresLock->Release();
             DEBUG('s', "Exiting P %d\n", key);
             break;
         }
@@ -300,11 +287,8 @@ ExceptionHandler(ExceptionType which)
         {
             DEBUG('s', "Entering V\n");
             sem_t key = machine->ReadRegister(4);
-
-            semaphoresLock->Acquire();
-            Semaphore * sem = (Semaphore *) semaphoresList->Find(key);
+            Semaphore * sem = semaphoresList->Get(key);
             sem->V();
-            semaphoresLock->Release();
             DEBUG('s', "Exiting V %d\n", key);
             break;
         }
