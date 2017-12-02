@@ -249,6 +249,12 @@ ExceptionHandler(ExceptionType which)
             break;
         }
 
+        case SC_ForkExec:
+        {
+          DEBUG('s', "Fork Exec\n");
+          break;
+        }
+
         case SC_NewSemaphore:
         {
             DEBUG('s', "New Semaphore\n");
