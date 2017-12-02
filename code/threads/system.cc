@@ -36,6 +36,7 @@ SynchDisk *synchDisk;
 Machine *machine;   // user program memory and registers
 # ifdef CHANGED
 SynchConsole *synchconsole;
+PageProvider *pageprovider;
 Semaphore *char_stack_lock;
 # endif // ifdef CHANGED
 #endif  // ifdef USER_PROGRAM
@@ -189,6 +190,7 @@ Initialize(int argc, char **argv)
     machine = new Machine(debugUserProg); // this must come first
     #ifdef CHANGED
     char_stack_lock = new Semaphore("char stack lock", 1);
+    pageprovider = new PageProvider();
     #endif
 #endif                                    // ifdef USER_PROGRAM
 

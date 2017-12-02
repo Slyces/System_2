@@ -66,7 +66,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     NoffHeader   noffH;
     unsigned int i, size;
 
-  #if CHANGED
+  #ifdef CHANGED
     threadNumber  = 0;
     bitMapLock    = new Lock("UserStack's Bit Map Lock");
     slotCondition =
@@ -106,7 +106,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
     for (i = 0; i < numPages; i++)
     {
         #ifdef CHANGED
-        pageTable[i].physicalPage = i + 1;
+        ASSERT(pageprovider->NumAvailPage() > 0);
+        int newpage = pageprovider->GetRandomEmptyPage();
+        pageTable[i].physicalPage = newpage;
         #endif //CHANGED
         // pageTable[i].physicalPage = i; // for now, phys page # = virtual page #
         pageTable[i].valid        = TRUE;
@@ -162,6 +164,7 @@ AddrSpace::~AddrSpace()
 
     // End of modification
     #ifdef CHANGED
+    delete pageprovider;
     delete stackBitMap;
     delete bitMapLock;
     delete slotCondition;

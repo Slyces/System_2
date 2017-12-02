@@ -32,21 +32,28 @@ extern Statistics *stats;            // performance metrics
 extern Timer *timer;                 // the hardware alarm clock
 
 #ifdef USER_PROGRAM
+
 # include "machine.h"
 extern Machine *machine; // user program memory and registers
 
+
 # ifdef CHANGED
+# include "pageprovider.h"
+extern PageProvider *pageprovider;
+
 int copyStringFromMachine(int      from,
                           char    *to,
                           unsigned size);
-int copyStringToMachine(char *from, unsigned int to, int size);
+int copyStringToMachine(char        *from,
+                        unsigned int to,
+                        int          size);
 
 // #  define MAX_STRING_SIZE 32
-#define MAX_STRING_SIZE 10
+#  define MAX_STRING_SIZE 10
 #  include "synchconsole.h"
 #  include "synch.h"
 extern SynchConsole *synchconsole; // synchconsole
-extern Semaphore *char_stack_lock;
+extern Semaphore    *char_stack_lock;
 # endif // ifdef CHANGED
 
 #endif // ifdef USER_PROGRAM

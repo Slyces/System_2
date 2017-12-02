@@ -283,7 +283,7 @@ IndexedElement::~IndexedElement () {
 void
 IndexedElement::InsertAfter(IndexedElement *elt)
 {
-  printf("insert 0x%x between 0x%x and 0x%x", this, elt, elt->next);
+  // printf("insert 0x%x between 0x%x and 0x%x", this, elt, elt->next);
   prev = elt;
   next = elt->next;
   elt->next = this;
@@ -294,7 +294,7 @@ IndexedElement::InsertAfter(IndexedElement *elt)
 void
 IndexedElement::InsertBefore(IndexedElement *elt)
 {
-  printf("insert 0x%x between 0x%x and 0x%x", this, elt->prev, elt);
+  // printf("insert 0x%x between 0x%x and 0x%x", this, elt->prev, elt);
   next = elt;
   prev = elt->prev;
   elt->prev = this;
@@ -305,7 +305,7 @@ IndexedElement::InsertBefore(IndexedElement *elt)
 void
 IndexedElement::Detach()
 {
-  printf("detach 0x%x from 0x%x and 0x%x", this, this->prev, this->next);
+  // printf("detach 0x%x from 0x%x and 0x%x", this, this->prev, this->next);
 
   if (next != NULL)
     next->prev = prev;
@@ -333,25 +333,25 @@ IndexedList::Insert (void *item)
     IndexedElement *element = new IndexedElement (item, -1);
     IndexedElement *next_elt;		// keep track
 
-    printf("Insert Call [first = 0x%x] [last = 0x%x] | ", first, last);
+    // printf("Insert Call [first = 0x%x] [last = 0x%x] | ", first, last);
 
     int key = 0;
 
     if (IsEmpty()) {
-      printf("empty - created 0x%x [new first]\n", element);
+      // printf("empty - created 0x%x [new first]\n", element);
       element->key = key;
     	first = element;
       last = element;
     } else {
     	  for(next_elt = first; next_elt != NULL; next_elt = next_elt->next) {
           if (key < next_elt->key) {
-            printf("[ %d < %d] ", key, next_elt->key);
+            // printf("[ %d < %d] ", key, next_elt->key);
             element->key = key;
             element->InsertBefore(next_elt);
             if (key == 0) {
               first = element;
-              printf("[new first]\n");
-            } else printf(" => created %d\n", key);
+              // printf("[new first]\n");
+            } // else printf(" => created %d\n", key);
             return key;
           }
           key++;

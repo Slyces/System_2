@@ -6,6 +6,6 @@
  ../userprog/bitmap.h ../filesys/openfile.h ../threads/switch.h \
  ../threads/synch.h ../threads/list.h ../threads/system.h \
  ../threads/scheduler.h ../machine/interrupt.h ../threads/list.h \
- ../machine/stats.h ../machine/timer.h ../userprog/synchconsole.h \
- ../machine/console.h ../userprog/syscall.h ../threads/synch.h \
- ../machine/valgrind.h
+ ../machine/stats.h ../machine/timer.h ../userprog/pageprovider.h \
+ ../userprog/addrspace.h ../userprog/synchconsole.h ../machine/console.h \
+ ../userprog/syscall.h ../threads/synch.h ../machine/valgrind.h
