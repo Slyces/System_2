@@ -36,6 +36,7 @@ Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 Lock * semaphoresLock = new Lock("Semaphore List Lock");
 IndexedList * semaphoresList = new IndexedList();
 
+
 #endif
 
 // ----------------------------------------------------------------------
@@ -99,7 +100,7 @@ ExceptionHandler(ExceptionType which)
         case SC_PutChar:
         {
             char_stack_lock->P();
-            // DEBUG('s', "PutChar\n");
+            DEBUG('s', "PutChar\n");
             int c = machine->ReadRegister(4); // information stockée dans r4
             synchconsole->SynchPutChar(c);
             char_stack_lock->V();
@@ -301,6 +302,46 @@ ExceptionHandler(ExceptionType which)
             semaphoresLock->Release();
             DEBUG('s', "Exiting V %d\n", key);
             break;
+        }
+
+        case SC_ForkExec:
+        {
+          semaphoresLock->Acquire();
+          DEBUG('s', "Fork Exec\n");
+          int f =  machine->ReadRegister(4);
+          int size = 256;
+          char *file = (char * ) malloc(sizeof(*file) * size);
+
+
+
+          copyStringFromMachine(f,file,size);
+          Thread *thread = new Thread("newThread");
+          OpenFile *executable = fileSystem->Open(file);
+
+          AddrSpace *space;
+          if(executable == NULL) {
+            printf("error opening %s\n",file);
+            free(file);
+            return;
+          }
+
+          space = new AddrSpace(executable);
+          if(space == NULL) {
+            printf("cannot allocate space for %s\n",file );
+            free(file);
+            return;
+          }
+
+          thread->space = space;
+
+          delete executable;
+
+          thread->Start((VoidFunctionPtr) startUserProcess,(void *) 0);
+          currentThread->Yield();
+          semaphoresLock->Release();
+        //  machine->Run();
+          free(file);
+          break;
         }
         #endif // CHANGED
 

@@ -46,6 +46,7 @@
 # define SC_DeleteSemaphore       21
 # define SC_P                     22
 # define SC_V                     23
+# define SC_ForkExec              24
 #endif // ifdef CHANGED
 
 #ifdef IN_USER_MODE
@@ -65,6 +66,7 @@ sem_t NewSemaphore(char * name, int init_value);
 void DeleteSemaphore(sem_t key);
 void P(sem_t semaphore);
 void V(sem_t sempahore);
+int ForkExec(const char *s);
 # endif // ifdef CHANGED
 
 // LB: This part is read only on compiling the test/*.c files.

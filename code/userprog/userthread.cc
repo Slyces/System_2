@@ -109,4 +109,11 @@ int do_ThreadExit() {
     // On ne sait pas si d'autres threads utilisent cet espace d'adressage
     return 1;
 }
+
+void
+startUserProcess(int f) {
+  currentThread->space->InitRegisters(); // set the initial register values
+  currentThread->space->RestoreState();
+  machine->Run();
+}
 #endif //CHANGED
