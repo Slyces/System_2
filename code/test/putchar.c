@@ -2,7 +2,7 @@
 
 void print(char c, int n)
 {
-        int i;
+      int i;
        #if 1
         for (i = 0; i < n; i++) {
                 PutChar(c + i);
@@ -13,7 +13,6 @@ void print(char c, int n)
 
 int main()
 {
-        int i ;
         print('a', 5);
         // Halt();
         while(1);

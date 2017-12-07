@@ -34,6 +34,8 @@ Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
 UserSemaphore * user_semaphores = new UserSemaphore(128);
 
+Lock * processLock = new Lock("Process Lock");
+
 
 #endif
 
@@ -248,12 +250,6 @@ ExceptionHandler(ExceptionType which)
             break;
         }
 
-        case SC_ForkExec:
-        {
-          DEBUG('s', "Fork Exec\n");
-          break;
-        }
-
         case SC_NewSemaphore:
         {
             DEBUG('s', "New Semaphore\n");
@@ -295,14 +291,12 @@ ExceptionHandler(ExceptionType which)
 
         case SC_ForkExec:
         {
-          semaphoresLock->Acquire();
           DEBUG('s', "Fork Exec\n");
           int f =  machine->ReadRegister(4);
           int size = 256;
           char *file = (char * ) malloc(sizeof(*file) * size);
 
-
-
+          processLock->Acquire();
           copyStringFromMachine(f,file,size);
           Thread *thread = new Thread("newThread");
           OpenFile *executable = fileSystem->Open(file);
@@ -326,8 +320,9 @@ ExceptionHandler(ExceptionType which)
           delete executable;
 
           thread->Start((VoidFunctionPtr) startUserProcess,(void *) 0);
+          processLock->Release();
           currentThread->Yield();
-          semaphoresLock->Release();
+
         //  machine->Run();
           free(file);
           break;
