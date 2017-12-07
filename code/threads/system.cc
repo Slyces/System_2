@@ -251,6 +251,9 @@ Cleanup()
     char_stack_lock = NULL;
     delete synchconsole;
     synchconsole = NULL;
+
+    delete pageprovider;
+    pageprovider = NULL;
     # endif // ifdef CHANGED
 
     delete machine;

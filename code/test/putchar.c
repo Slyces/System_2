@@ -13,7 +13,8 @@ void print(char c, int n)
 
 int main()
 {
+        PutString("\nI am putchar and I'm usefull\n");
         print('a', 5);
+        PutString("\nI am putchar and I'm out\n");
         // Halt();
-        while(1);
 }

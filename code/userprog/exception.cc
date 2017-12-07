@@ -239,32 +239,6 @@ ExceptionHandler(ExceptionType which)
             break;
         }
 
-        case SC_ThreadExit:
-        {
-            DEBUG('s', "Thread Exit\n");
-
-            if (currentThread->space->IsLastThread()) interrupt->Halt();
-            else do_ThreadExit();
-            break;
-        }
-
-        case SC_Exit:
-        {
-            DEBUG('s', "Exit\n");
-
-            if (currentThread->space->IsLastThread()) {
-                processLock->Acquire();
-                nb_process--;
-
-                delete currentThread->space;
-
-                if (nb_process == 0) interrupt->Halt();
-                processLock->Release();
-            }
-            else do_ThreadExit();
-            break;
-        }
-
         case SC_NewSemaphore:
         {
             DEBUG('s', "New Semaphore\n");
@@ -338,6 +312,7 @@ ExceptionHandler(ExceptionType which)
 
             processLock->Acquire();
             nb_process++;
+            printf("\nThere is now %d process\n", nb_process);
             processLock->Release();
 
             thread->Start((VoidFunctionPtr)startUserProcess, (void *)0);
@@ -345,6 +320,20 @@ ExceptionHandler(ExceptionType which)
             // currentThread->Yield();
 
             //  machine->Run();
+            break;
+        }
+
+        case SC_ThreadExit:
+        {
+            DEBUG('s', "Thread Exit\n");
+            do_Exit();
+            break;
+        }
+
+        case SC_Exit:
+        {
+            DEBUG('s', "Exit\n");
+            do_Exit();
             break;
         }
         #endif // CHANGED

@@ -158,13 +158,18 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
+    for (int i = 0; i < numPages; i++)
+    {
+        #ifdef CHANGED
+        pageprovider->ReleasePage(pageTable[i].physicalPage);
+        #endif //CHANGED
+    }
     // LB: Missing [] for delete
     // delete pageTable;
     delete[] pageTable;
 
     // End of modification
     #ifdef CHANGED
-    delete pageprovider;
     delete stackBitMap;
     delete bitMapLock;
     delete slotCondition;

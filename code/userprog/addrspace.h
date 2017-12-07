@@ -22,7 +22,7 @@ class Lock;
 class Condition;
 
 #ifdef CHANGED
-#define ThreadStackSize 256
+#define ThreadStackSize 1024
 #define UserStacksAreaSize  (ThreadStackSize * 16)	// increase this as necessary!
 #endif //CHANGED
 
