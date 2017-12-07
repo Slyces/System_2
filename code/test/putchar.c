@@ -13,6 +13,8 @@ void print(char c, int n)
 
 int main()
 {
-        print('a', 4);
+        int i ;
+        print('a', 5);
         // Halt();
+        while(1);
 }

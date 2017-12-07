@@ -72,6 +72,7 @@ void DeleteSemaphore(sem_t key);
 
 void P(sem_t semaphore);
 void V(sem_t sempahore);
+int ForkExec(const char *s);
 # endif // ifdef CHANGED
 
 // LB: This part is read only on compiling the test/*.c files.
