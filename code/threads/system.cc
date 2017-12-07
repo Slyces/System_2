@@ -35,9 +35,19 @@ SynchDisk *synchDisk;
 #ifdef USER_PROGRAM // requires either FILESYS or FILESYS_STUB
 Machine *machine;   // user program memory and registers
 # ifdef CHANGED
+
 SynchConsole *synchconsole;
 PageProvider *pageprovider;
 Semaphore *char_stack_lock;
+
+// gestion des sémaphores
+UserSemaphore * user_semaphores;
+Semaphore * threads_mutex;
+
+// gestion de processus
+Lock * processLock;
+int nb_process;
+
 # endif // ifdef CHANGED
 #endif  // ifdef USER_PROGRAM
 
@@ -191,6 +201,14 @@ Initialize(int argc, char **argv)
     #ifdef CHANGED
     char_stack_lock = new Semaphore("char stack lock", 1);
     pageprovider = new PageProvider();
+
+    // gestion des sémaphores
+    user_semaphores = new UserSemaphore(128);
+    threads_mutex = new Semaphore("thread mutex", 1);
+
+    // gestion de processus
+    processLock = new Lock("Process Lock");
+    nb_process = 1; // Le premier processus ne se fabrique pas lui même
     #endif
 #endif                                    // ifdef USER_PROGRAM
 

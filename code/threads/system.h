@@ -33,13 +33,22 @@ extern Timer *timer;                 // the hardware alarm clock
 
 #ifdef USER_PROGRAM
 
-typedef int sem_t;
-
 # include "machine.h"
 extern Machine *machine; // user program memory and registers
 
 
 # ifdef CHANGED
+
+// Gestion des sémaphores
+#include "usersemaphores.h"
+#include "synch.h"
+extern Semaphore * threads_mutex;
+extern UserSemaphore * user_semaphores;
+
+// Gestion des processus
+extern Lock * processLock;
+extern int nb_process;
+
 # include "pageprovider.h"
 extern PageProvider *pageprovider;
 

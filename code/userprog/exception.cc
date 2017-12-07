@@ -30,14 +30,8 @@
 # include "userthread.h"
 # include "usersemaphores.h"
 
-Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
-UserSemaphore * user_semaphores = new UserSemaphore(128);
-
-Lock * processLock = new Lock("Process Lock");
-
-
-#endif
+#endif // ifdef CHANGED
 
 // ----------------------------------------------------------------------
 // UpdatePC : Increments the Program Counter register in order to resume
@@ -111,15 +105,15 @@ ExceptionHandler(ExceptionType which)
         {
             char_stack_lock->P();
             DEBUG('s', "PutString\n");
-            int   adress = machine->ReadRegister(4);
+            int  adress = machine->ReadRegister(4);
             char string[MAX_STRING_SIZE];
-            int   total      = 0;
-            int   written = 0;
+            int  total   = 0;
+            int  written = 0;
 
             do {
                 written = copyStringFromMachine(adress + total,
-                                          string,
-                                          MAX_STRING_SIZE);
+                                                string,
+                                                MAX_STRING_SIZE);
                 synchconsole->SynchPutString(string);
                 total += written;
             } while (written >= MAX_STRING_SIZE - 1);
@@ -145,21 +139,30 @@ ExceptionHandler(ExceptionType which)
 
             DEBUG('s', "GetString\n");
             unsigned int adress = machine->ReadRegister(4);
-            int  n              = machine->ReadRegister(5);
+            int n               = machine->ReadRegister(5);
 
             char string[MAX_STRING_SIZE + 1];
-            int i, written;
-            for(i = 0; i <= n/MAX_STRING_SIZE ; i++) {
-              if(i != n/MAX_STRING_SIZE) {
-                // default loop
-                written = synchconsole->SynchGetString(string, MAX_STRING_SIZE + 1);
-                copyStringToMachine(string, adress + i * MAX_STRING_SIZE, written + 1);
-                if (written <= MAX_STRING_SIZE) break;
-              } else {
-                // last loop
-                written = synchconsole->SynchGetString(string, n % MAX_STRING_SIZE + 1);
-                copyStringToMachine(string, adress + i * MAX_STRING_SIZE, written + 1);
-              }
+            int  i, written;
+
+            for (i = 0; i <= n / MAX_STRING_SIZE; i++) {
+                if (i != n / MAX_STRING_SIZE) {
+                    // default loop
+                    written = synchconsole->SynchGetString(string,
+                                                           MAX_STRING_SIZE + 1);
+                    copyStringToMachine(string,
+                                        adress + i * MAX_STRING_SIZE,
+                                        written + 1);
+
+                    if (written <= MAX_STRING_SIZE) break;
+                } else {
+                    // last loop
+                    written = synchconsole->SynchGetString(string,
+                                                           n % MAX_STRING_SIZE +
+                                                           1);
+                    copyStringToMachine(string,
+                                        adress + i * MAX_STRING_SIZE,
+                                        written + 1);
+                }
             }
             char_stack_lock->V();
             break;
@@ -200,52 +203,64 @@ ExceptionHandler(ExceptionType which)
 
         case SC_ThreadCreate:
         {
-          DEBUG('s', "ThreadCreate\n");
-          int f_adress = machine->ReadRegister(4);
-          int arg_adress = machine->ReadRegister(5);
-          int exit_adress = machine->ReadRegister(6);
+            DEBUG('s', "ThreadCreate\n");
+            int f_adress    = machine->ReadRegister(4);
+            int arg_adress  = machine->ReadRegister(5);
+            int exit_adress = machine->ReadRegister(6);
 
-          threads_mutex->P();
-          int n = do_ThreadCreate(f_adress, arg_adress, exit_adress);
-          if (n == -1)
-              DEBUG('s', "Thread not created : no stack slot available");
-          machine->WriteRegister(2, n); // return 1 if created, -1 if not
-          threads_mutex->V();
-          break;
+            threads_mutex->P();
+            int n = do_ThreadCreate(f_adress, arg_adress, exit_adress);
+
+            if (n ==
+                -1) DEBUG('s',
+                          "Thread not created : no stack slot available");
+            machine->WriteRegister(2, n); // return 1 if created, -1 if not
+            threads_mutex->V();
+            break;
         }
 
         case SC_WaitingThreadCreate:
         {
-          DEBUG('s', "ThreadCreate\n");
-          int f_adress = machine->ReadRegister(4);
-          int arg_adress = machine->ReadRegister(5);
-          int exit_adress = machine->ReadRegister(6);
+            DEBUG('s', "ThreadCreate\n");
+            int f_adress    = machine->ReadRegister(4);
+            int arg_adress  = machine->ReadRegister(5);
+            int exit_adress = machine->ReadRegister(6);
 
-          threads_mutex->P();
+            threads_mutex->P();
 
-          int n = do_WaitingThreadCreate(f_adress, arg_adress, exit_adress);
-          if (n == -1)
-              DEBUG('s', "Thread not created : no stack slot available");
-          machine->WriteRegister(2, n); // return 1 if created, -1 if not
+            int n = do_WaitingThreadCreate(f_adress, arg_adress, exit_adress);
 
-          threads_mutex->V();
-          break;
+            if (n ==
+                -1) DEBUG('s',
+                          "Thread not created : no stack slot available");
+            machine->WriteRegister(2, n); // return 1 if created, -1 if not
+
+            threads_mutex->V();
+            break;
         }
 
         case SC_ThreadExit:
         {
-          DEBUG('s', "Thread Exit\n");
-          if (currentThread->space->IsLastThread())
-              interrupt->Halt();
-          else do_ThreadExit();
-          break;
+            DEBUG('s', "Thread Exit\n");
+
+            if (currentThread->space->IsLastThread()) interrupt->Halt();
+            else do_ThreadExit();
+            break;
         }
 
         case SC_Exit:
         {
             DEBUG('s', "Exit\n");
-            if (currentThread->space->IsLastThread())
-                interrupt->Halt();
+
+            if (currentThread->space->IsLastThread()) {
+                processLock->Acquire();
+                nb_process--;
+
+                delete currentThread->space;
+
+                if (nb_process == 0) interrupt->Halt();
+                processLock->Release();
+            }
             else do_ThreadExit();
             break;
         }
@@ -253,10 +268,10 @@ ExceptionHandler(ExceptionType which)
         case SC_NewSemaphore:
         {
             DEBUG('s', "New Semaphore\n");
-            char * debug_name = (char *) machine->ReadRegister(4);
-            int initial_value = machine->ReadRegister(5);
-            Semaphore * new_sem = new Semaphore(debug_name, initial_value);
-            sem_t key = user_semaphores->Add(new_sem);
+            char *debug_name    = (char *)machine->ReadRegister(4);
+            int   initial_value = machine->ReadRegister(5);
+            Semaphore *new_sem  = new Semaphore(debug_name, initial_value);
+            sem_t key           = user_semaphores->Add(new_sem);
             machine->WriteRegister(2, key);
             break;
         }
@@ -264,7 +279,7 @@ ExceptionHandler(ExceptionType which)
         case SC_DeleteSemaphore:
         {
             DEBUG('s', "Delete Semaphore\n");
-            sem_t key = (sem_t) machine->ReadRegister(4);
+            sem_t key = (sem_t)machine->ReadRegister(4);
             user_semaphores->Remove(key);
             break;
         }
@@ -272,8 +287,8 @@ ExceptionHandler(ExceptionType which)
         case SC_P:
         {
             DEBUG('s', "Entering P\n");
-            sem_t key = machine->ReadRegister(4);
-            Semaphore * sem = user_semaphores->Get(key);
+            sem_t key      = machine->ReadRegister(4);
+            Semaphore *sem = user_semaphores->Get(key);
             sem->P();
             DEBUG('s', "Exiting P %d\n", key);
             break;
@@ -282,8 +297,8 @@ ExceptionHandler(ExceptionType which)
         case SC_V:
         {
             DEBUG('s', "Entering V\n");
-            sem_t key = machine->ReadRegister(4);
-            Semaphore * sem = user_semaphores->Get(key);
+            sem_t key      = machine->ReadRegister(4);
+            Semaphore *sem = user_semaphores->Get(key);
             sem->V();
             DEBUG('s', "Exiting V %d\n", key);
             break;
@@ -291,41 +306,46 @@ ExceptionHandler(ExceptionType which)
 
         case SC_ForkExec:
         {
-          DEBUG('s', "Fork Exec\n");
-          int f =  machine->ReadRegister(4);
-          int size = 256;
-          char *file = (char * ) malloc(sizeof(*file) * size);
+            DEBUG('s', "Fork Exec\n");
+            int   f    =  machine->ReadRegister(4);
+            int   size = 256;
+            char *file = (char *)malloc(sizeof(*file) * size);
 
-          processLock->Acquire();
-          copyStringFromMachine(f,file,size);
-          Thread *thread = new Thread("newThread");
-          OpenFile *executable = fileSystem->Open(file);
+            copyStringFromMachine(f, file, size);
+            Thread   *thread     = new Thread("newThread");
+            OpenFile *executable = fileSystem->Open(file);
 
-          AddrSpace *space;
-          if(executable == NULL) {
-            printf("error opening %s\n",file);
+            AddrSpace *space;
+
+            if (executable == NULL) {
+                printf("error opening %s\n", file);
+                free(file);
+                return;
+            }
+
+            space = new AddrSpace(executable);
+
+            if (space == NULL) {
+                printf("cannot allocate space for %s\n", file);
+                free(file);
+                return;
+            }
+
             free(file);
-            return;
-          }
 
-          space = new AddrSpace(executable);
-          if(space == NULL) {
-            printf("cannot allocate space for %s\n",file );
-            free(file);
-            return;
-          }
+            thread->space = space;
+            delete executable;
 
-          thread->space = space;
+            processLock->Acquire();
+            nb_process++;
+            processLock->Release();
 
-          delete executable;
+            thread->Start((VoidFunctionPtr)startUserProcess, (void *)0);
 
-          thread->Start((VoidFunctionPtr) startUserProcess,(void *) 0);
-          processLock->Release();
-          currentThread->Yield();
+            // currentThread->Yield();
 
-        //  machine->Run();
-          free(file);
-          break;
+            //  machine->Run();
+            break;
         }
         #endif // CHANGED
 

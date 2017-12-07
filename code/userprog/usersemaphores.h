@@ -1,8 +1,9 @@
 #ifndef H_USERSEMAPHORES
 #define H_USERSEMAPHORES
-#include "system.h"
 #include "synch.h"
 #include "bitmap.h"
+
+typedef int sem_t;
 
 class UserSemaphore {
 public:
