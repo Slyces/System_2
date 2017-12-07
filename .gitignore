@@ -1,3 +1,4 @@
 code/test/Makefile
 *.coff
 *.o
+*.d
