@@ -9,4 +9,4 @@
  ../userprog/pageprovider.h ../userprog/addrspace.h \
  ../userprog/synchconsole.h ../machine/console.h ../userprog/syscall.h \
  ../threads/synch.h ../threads/synch.h syscall.h userthread.h \
- ../threads/thread.h
+ ../threads/thread.h usersemaphores.h bitmap.h

@@ -5,12 +5,14 @@ create_sem(void * ignored) {
     int i, j = 0;
     sem_t semaphore;
     semaphore = NewSemaphore("Some Sem", 1);
+    printf("Created %d\n", semaphore);
     for (i = 0; i < 200; i++) {
-      PutChar(' ');
+      // PutChar(' ');
       // P(semaphore);
       // V(semaphore);
     }
     DeleteSemaphore(semaphore);
+    printf("Deleted %d\n", semaphore);
     return;
 }
 

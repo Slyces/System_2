@@ -28,12 +28,11 @@
 
 #ifdef CHANGED
 # include "userthread.h"
-
-typedef int sem_t;
+# include "usersemaphores.h"
 
 Semaphore * threads_mutex = new Semaphore("thread mutex", 1);
 
-UserSemaphore user_semaphores = new UserSemaphore(8);
+UserSemaphore * user_semaphores = new UserSemaphore(128);
 
 #endif
 
@@ -259,7 +258,7 @@ ExceptionHandler(ExceptionType which)
             DEBUG('s', "New Semaphore\n");
             char * debug_name = (char *) machine->ReadRegister(4);
             int initial_value = machine->ReadRegister(5);
-            Semaphore * new_sem = new Semaphore("debug_name", initial_value);
+            Semaphore * new_sem = new Semaphore(debug_name, initial_value);
             sem_t key = user_semaphores->Add(new_sem);
             machine->WriteRegister(2, key);
             break;
@@ -287,7 +286,7 @@ ExceptionHandler(ExceptionType which)
         {
             DEBUG('s', "Entering V\n");
             sem_t key = machine->ReadRegister(4);
-            Semaphore * sem = semaphoresList->Get(key);
+            Semaphore * sem = user_semaphores->Get(key);
             sem->V();
             DEBUG('s', "Exiting V %d\n", key);
             break;
