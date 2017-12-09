@@ -312,14 +312,10 @@ ExceptionHandler(ExceptionType which)
 
             processLock->Acquire();
             nb_process++;
-            printf("\nThere is now %d process\n", nb_process);
             processLock->Release();
 
-            thread->Start((VoidFunctionPtr)startUserProcess, (void *)0);
+            thread->Start((VoidFunctionPtr)startUserProcess, thread->space);
 
-            // currentThread->Yield();
-
-            //  machine->Run();
             break;
         }
 

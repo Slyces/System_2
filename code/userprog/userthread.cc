@@ -141,9 +141,14 @@ do_Exit() {
 }
 
 void
-startUserProcess(int f) {
-    currentThread->space->InitRegisters(); // set the initial register values
-    currentThread->space->RestoreState();
+startUserProcess(void * sp) {
+    AddrSpace * space;
+    space = (AddrSpace *) sp;
+    space->InitRegisters();
+    space->RestoreState();
+    currentThread->space = space;
+    //currentThread->space->InitRegisters(); // set the initial register values
+    //currentThread->space->RestoreState();
     machine->Run();
 }
 

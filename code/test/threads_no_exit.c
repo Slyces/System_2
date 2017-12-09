@@ -7,7 +7,6 @@ thread_test(void* array) {
     int n = 10;
 
     for (i = 0; i < n; i++) {
-      /* code */
       PutChar('a' + id - 1);
     }
 
