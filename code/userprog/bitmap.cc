@@ -71,6 +71,7 @@ BitMap::Mark (int which)
 void
 BitMap::Clear (int which)
 {
+    printf("Appelé [size %d] !\n", numBits);
     ASSERT (which >= 0 && which < numBits);
     map[which / BitsInWord] &= ~(1 << (which % BitsInWord));
     // Même procédé, cette fois ci le bit choisi sera à 0, les autres à 1
@@ -88,7 +89,6 @@ bool
 BitMap::Test (int which)
 {
     ASSERT (which >= 0 && which < numBits);
-
     if (map[which / BitsInWord] & (1 << (which % BitsInWord)))
         // Il n'existe qu'un seul bit à 1 dans (1 << (which % BitsInWord))
         // Donc pour que cette opération donne un résultat > 0, on doit
@@ -110,6 +110,7 @@ BitMap::Test (int which)
 int
 BitMap::Find ()
 {
+  printf("Appelé [size %d] !\n", numBits);
     for (int i = 0; i < numBits; i++)
     	if (!Test (i))
     	  {

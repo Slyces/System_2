@@ -8,6 +8,7 @@ producteur(void* array) {
     sem_t sem_prod = (sem_t) ((int *) array)[1];
     sem_t sem_cons = (sem_t) ((int *) array)[2];
     P(sem_prod);
+    printf("1 produit créé\n");
     V(sem_cons);
 }
 
@@ -17,6 +18,7 @@ consommateur(void* array) {
     sem_t sem_prod = (sem_t) ((int *) array)[1];
     sem_t sem_cons = (sem_t) ((int *) array)[2];
     P(sem_cons);
+    printf("1 produit consommé\n");
     V(sem_prod);
 }
 

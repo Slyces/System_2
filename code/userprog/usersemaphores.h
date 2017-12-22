@@ -17,7 +17,7 @@ public:
 private:
 
     Lock *lock;
-    BitMap *bitmap;
+    BitMap *sem_bitmap;
     int size;
     Semaphore * sem_array[];
 };

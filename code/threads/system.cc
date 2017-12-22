@@ -203,7 +203,7 @@ Initialize(int argc, char **argv)
     pageprovider = new PageProvider();
 
     // gestion des sémaphores
-    user_semaphores = new UserSemaphore(128);
+    user_semaphores = new UserSemaphore(32);
     threads_mutex = new Semaphore("thread mutex", 1);
 
     // gestion de processus
