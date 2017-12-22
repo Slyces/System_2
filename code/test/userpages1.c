@@ -16,14 +16,14 @@ void f(void *arg) {
         int i;
         for (i = 0; i < N; i++) {
                 puts(s);
+                ThreadExit();
         }
-        ThreadExit();
 }
 
 int main()
 {
         int i;
-        for (i = 0; i < 5; i++) {
+        for (i = 0; i < 12; i++) {
                 ThreadCreate(f, THIS);
         }
         f(THAT);

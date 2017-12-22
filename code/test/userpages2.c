@@ -23,7 +23,7 @@ void f(void *arg) {
 int main()
 {
         int i;
-        for (i = 0; i < 5; i++) {
+        for (i = 0; i < 12; i++) {
                 ThreadCreate(f, THIS);
         }
         f(THAT);

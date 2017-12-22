@@ -9,5 +9,5 @@ extern int do_ThreadCreate(int f, int arg, int exit_adress);
 extern int do_WaitingThreadCreate(int f, int arg, int exit_adress);
 extern int do_ThreadExit();
 extern void do_Exit();
-extern void startUserProcess(int f);
+extern void startUserProcess(void *);
 #endif // USERTHREAD_H
